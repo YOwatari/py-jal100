@@ -6,28 +6,11 @@ import time
 from multiprocessing import Process
 from itertools import islice
 import math
+import sys
 
 _pass = '567890'
 _salt = 'hoge'
 _hash = hashlib.md5(_salt + '$' + _pass).hexdigest()
-
-
-# Yakst - Pythonスクリプトのパフォーマンス計測ガイド
-# http://yakst.com/ja/posts/42
-class Timer(object):
-    def __init__(self, verbose=False):
-        self.verbose = verbose
-
-    def __enter__(self):
-        self.start = time.time()
-        return self
-
-    def __exit__(self, *args):
-        self.end = time.time()
-        self.secs = self.end - self.start
-        self.msecs = self.secs * 1000  # millisecs
-        if self.verbose:
-            print 'elapsed time: %f ms' % self.msecs
 
 
 def get_hash(salt, password):
@@ -40,12 +23,12 @@ def pwd_check(arg):
 
 
 def task(num, numbers):
-    with Timer() as t:
-        for i in numbers:
-            if pwd_check(i):
-                print "password: %s" % i
-                break
-    print "=> process%d elasped times: %s s" % (num, t.secs)
+    start = time.time()
+    for i in numbers:
+        if pwd_check(i):
+            print "password: %s" % i
+            print "=> elapsed times: %s s" % (time.time() - start)
+    print "=> process%d elasped times: %s s" % (num, time.time() - start)
 
 
 def multi(processes):
@@ -81,4 +64,4 @@ if __name__ == '__main__':
     multi(1)
 
     print "\nMultiProcessing..."
-    multi(4)
+    multi(int(sys.argv[1]))
