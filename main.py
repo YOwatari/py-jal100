@@ -3,7 +3,7 @@
 
 import hashlib
 import time
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 from itertools import islice
 import math
 
@@ -39,12 +39,17 @@ def pwd_check(arg):
     return get_hash(_salt, arg) == _hash
 
 
-def task(q, numbers):
-    q.put([a for a in numbers if pwd_check(a)])
+def task(num, numbers):
+    # q.put([i for i in numbers if pwd_check(i)])
+    with Timer() as t:
+        for i in numbers:
+            if pwd_check(i):
+                print "password: %s" % i
+                break
+    print "=> process%d elasped times: %s s" % (num, t.secs)
 
 
-def main():
-    queue = Queue()
+def multi():
     limit = 1000000
     workers = 4
     tasks = int(math.ceil(float(limit)/float(workers)))
@@ -52,17 +57,28 @@ def main():
     limit_loop = xrange(limit)
     jobs = [Process(
         target=task,
-        args=(queue, islice(limit_loop, tasks*i, tasks*(i+1))))
+        args=(i, islice(limit_loop, tasks*i, tasks*(i+1))))
         for i in xrange(workers)]
 
     for job in jobs:
         job.start()
-    for job in jobs:
-        print queue.get()
-        job.join()
+
+
+def non_multi():
+    limit = 1000000
+    for i in xrange(limit):
+        if pwd_check(i):
+            print "password: %s" % i
+            return
+
 
 if __name__ == '__main__':
     print "pass: %s\nsalt: %s\nhash: %s" % (_pass, _salt, _hash)
+
+    print "\nNon MultiProcessing..."
     with Timer() as t:
-        main()
+        non_multi()
     print "=> elasped times: %s s" % t.secs
+
+    print "\nMultiProcessing..."
+    multi()
