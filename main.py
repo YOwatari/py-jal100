@@ -40,7 +40,6 @@ def pwd_check(arg):
 
 
 def task(num, numbers):
-    # q.put([i for i in numbers if pwd_check(i)])
     with Timer() as t:
         for i in numbers:
             if pwd_check(i):
@@ -49,9 +48,9 @@ def task(num, numbers):
     print "=> process%d elasped times: %s s" % (num, t.secs)
 
 
-def multi():
+def multi(processes):
     limit = 1000000
-    workers = 4
+    workers = processes
     tasks = int(math.ceil(float(limit)/float(workers)))
 
     limit_loop = xrange(limit)
@@ -62,6 +61,9 @@ def multi():
 
     for job in jobs:
         job.start()
+
+    if len(jobs) == 1:
+        jobs[0].join()
 
 
 def non_multi():
@@ -76,9 +78,7 @@ if __name__ == '__main__':
     print "pass: %s\nsalt: %s\nhash: %s" % (_pass, _salt, _hash)
 
     print "\nNon MultiProcessing..."
-    with Timer() as t:
-        non_multi()
-    print "=> elasped times: %s s" % t.secs
+    multi(1)
 
     print "\nMultiProcessing..."
-    multi()
+    multi(4)
