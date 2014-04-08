@@ -58,10 +58,15 @@ def non_multi():
 
 
 if __name__ == '__main__':
+    try:
+        processes = int(sys.argv[1])
+    except:
+        processes = 2
+
     print "pass: %s\nsalt: %s\nhash: %s" % (_pass, _salt, _hash)
 
     print "\nNon MultiProcessing..."
     multi(1)
 
     print "\nMultiProcessing..."
-    multi(int(sys.argv[1]))
+    multi(processes)
